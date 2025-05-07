@@ -80,8 +80,8 @@ This gives a **lower bound** on the variance of any unbiased estimate of the sou
 
 ---
 
-### **5. Application in Your Document**
+### **5. Application in our Paper**
 
-In your uploaded file, the CRLB is discussed as a benchmark to **evaluate the accuracy** of the proposed localization scheme. Specifically, the authors derive or refer to the CRLB under their system model and compare it with simulation results to show how close their proposed method is to the theoretical bound, which confirms the estimator's efficiency or near-optimality .
+In our reference paper, the CRLB is discussed as a benchmark to **evaluate the accuracy** of the proposed localization scheme. Specifically, the authors derive or refer to the CRLB under their system model and compare it with simulation results to show how close their proposed method is to the theoretical bound, which confirms the estimator's efficiency or near-optimality .
 
 
