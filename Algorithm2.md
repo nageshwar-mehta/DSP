@@ -1,78 +1,134 @@
 
+# 📡 Algorithm 2: Trilateration
 
-### **Algorithm 2: Trilateration**
-
-**Input:** Sender positions $s_j$, distances $d_j$, weights $w_{ij}$
-**Output:** Receiver position(s) $\mathbf{x}$
+This algorithm estimates the position of a receiver using trilateration by solving an eigenvalue-based formulation. Unlike Algorithm 1, it is designed to **handle degenerate cases** where multiple or no solutions may exist.
 
 ---
 
-1. **Normalize weights:**
-   Ensure the weights form a valid convex combination:
+## 📥 Input
 
-   $$
-   w_{ij} \leftarrow \frac{w_{ij}}{\sum_{i,j} w_{ij}}
-   $$
-
-2. **Translate sender positions:**
-   Center the sender coordinates by subtracting the weighted average:
-
-   $$
-   \mathbf{t} = \sum_{i,j} w_{ij} \mathbf{s}_i,\quad \mathbf{s}_j \leftarrow \mathbf{s}_j - \mathbf{t}
-   $$
-
-3. **Calculate matrices $\mathbf{D}$ and vector $\mathbf{b}$:**
-   These represent the reduced quadratic form and gradient in the transformed coordinate system (from equation 21).
-
-4. **Find the largest real eigenvalue $\lambda_{\max}$ of matrix $\mathbf{M}$:**
-   Matrix $\mathbf{M}$ (from equation 24) encodes the lifted quartic optimization problem as an eigenvalue problem.
+* $s_j$: Sender positions (known anchor locations)
+* $d_j$: Measured distances from the receiver to each sender
+* $w_{ij}$: Weights for sender pairs (used in the cost function)
 
 ---
 
-### **Case Handling Based on Matrix Rank:**
+## 📤 Output
 
-5. **If** $\text{rank}(\lambda_{\max} \mathbf{I} - \mathbf{D}) = n$:
-   There is a **unique solution** for $y$.
-
-6. **Solve for $y$** using equations (33)–(34), and choose the **sign in equation (34)** to ensure:
-
-   $$
-   \text{sign}(y_1) = -\text{sign}(b_1)
-   $$
-
-   (this resolves ambiguity in square root solutions)
+* Estimated receiver position(s) $x \in \mathbb{R}^n$, or no output if the configuration is degenerate
 
 ---
 
-7. **Else if** $\text{rank}(\lambda_{\max} \mathbf{I} - \mathbf{D}) = n - 1$:
-   The solution is **ambiguous** — there are **two valid solutions**.
+## 🧠 Steps
 
-8. **Solve for both solutions** $y_1$ and $y_2$ using the same system (equations 33–34).
+### Step 1: Normalize Weights
 
----
-
-9. **Else:**
-   The matrix is too degenerate, and the problem is **ill-defined** (e.g., all sensors lie on a line or plane in 3D).
-
-10. **Return nothing** (i.e., no valid localization possible).
-
----
-
-11. **Undo the rotation:**
-    Map back from reduced coordinate system to full space using:
+Normalize the weight matrix so the total weight sums to 1:
 
 $$
-\mathbf{x} = Q y
-$$
-
-12. **Undo the translation:**
-    Add back the original translation offset:
-
-$$
-\mathbf{x} \leftarrow \mathbf{x} + \mathbf{t}
+w_{ij} \leftarrow \frac{w_{ij}}{\sum_{i,j} w_{ij}}
 $$
 
 ---
 
-This algorithm is more general than Algorithm 1 and carefully handles **degenerate configurations** (e.g., co-linear or co-planar sensor layouts) by inspecting the rank of the matrix involved in the eigenvalue problem.
+### Step 2: Translate Sender Positions
+
+Remove the weighted centroid of sender positions:
+
+$$
+t = \sum_{i,j} w_{ij} s_i \quad\Rightarrow\quad s_j \leftarrow s_j - t
+$$
+
+---
+
+### Step 3: Compute $\mathbf{D}$ and $\mathbf{b}$
+
+Calculate the reduced matrix $\mathbf{D}$ and gradient vector $\mathbf{b}$ from equation (21) using the translated senders and weights.
+
+---
+
+### Step 4: Solve Eigenvalue Problem
+
+Compute the **largest real eigenvalue** $\lambda_{\text{max}}$ of matrix $\mathbf{M}$, defined in equation (24). This matrix is constructed from $\mathbf{D}$, $\mathbf{b}$, and identity/zero blocks.
+
+---
+
+### Step 5–10: Determine Solution Type
+
+#### Case 1: Full Rank
+
+If
+
+$$
+\text{rank}(\lambda_{\text{max}} I - D) = n
+$$
+
+Then a **unique solution** $y$ exists.
+
+Use equations (33)–(34) to solve for $y$, and choose the sign in equation (34) such that:
+
+$$
+\text{sign}(y_1) = -\text{sign}(b_1)
+$$
+
+---
+
+#### Case 2: Rank Deficient
+
+If
+
+$$
+\text{rank}(\lambda_{\text{max}} I - D) = n - 1
+$$
+
+Then **two distinct solutions** $y_1$ and $y_2$ are valid. Solve for both using the same equations.
+
+---
+
+#### Case 3: Ill-Defined
+
+If
+
+$$
+\text{rank}(\lambda_{\text{max}} I - D) < n - 1
+$$
+
+Then the problem is **ill-defined** (e.g., due to degenerate sensor geometry), and **no solution** is returned.
+
+---
+
+### Step 11: Undo Rotation
+
+Transform the reduced-coordinate solution $y$ back to full space using:
+
+$$
+x = Q y
+$$
+
+where $Q$ is the orthonormal basis used in the dimensionality reduction step.
+
+---
+
+### Step 12: Undo Translation
+
+Restore the original coordinate frame:
+
+$$
+x \leftarrow x + t
+$$
+
+---
+
+## ✅ Key Features
+
+* Handles both **unique** and **ambiguous** solutions
+* Checks matrix rank to avoid unstable or undefined behavior
+* Solves localization using **non-iterative, eigenvalue-based methods**
+
+---
+
+## 📎 References
+
+* Refer to equations (20)–(34) in the paper *"Single-Source Localization as an Eigenvalue Problem"* for mathematical derivations.
+
 
