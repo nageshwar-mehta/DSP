@@ -2,21 +2,6 @@
 
 ### 📍 **Algorithm 1: Simplified Trilateration**
 
-
-
-
-**Input:** Sender positions \( s_j \), distances \( d_j \), weights \( w_{ij} \)  
-**Output:** Receiver position \( x \)
-
-1: Normalize weights: \( w_{ij} \leftarrow w_{ij} / \sum_{ij} w_{ij} \)  
-2: Translate senders: \( s_j \leftarrow s_j - t \), where \( t = \sum_{ij} w_{ij} s_i \)  
-3: Calculate \( A \) and \( g \) in (20).  
-4: Find largest real eigenvalue \( \lambda_{\max} \) of \( M_A \) (31).  
-5: Find receiver position as \( x = -(\lambda_{\max} I - A)^{-1} g \)  
-6: Undo translation: \( x \leftarrow x + t \)
-
-
-
 This algorithm estimates the **receiver position** $x$ given known **sender positions** $s_j$, **measured distances** $d_j$, and **weights** $w_{ij}$. The approach reformulates the localization problem as an **eigenvalue problem** for fast, stable, and non-iterative computation.
 
 ---
